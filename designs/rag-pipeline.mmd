@@ -1,0 +1,31 @@
+graph LR
+    subgraph Upload["Document Upload Flow"]
+        Doc["📄 Document<br/>PDF/Markdown"]
+        Load["Load Text"]
+        Split["Chunk Text<br/>800 tokens"]
+        Embed["Generate Embeddings<br/>Gemini API"]
+        Store["Store in Chroma<br/>with Metadata"]
+    end
+
+    subgraph Query["Query/Chat Flow"]
+        Question["❓ User Question"]
+        EmbedQ["Embed Question<br/>Gemini API"]
+        Retrieve["Retrieve Top-K<br/>Similar Chunks"]
+        Build["Build Context<br/>Concatenate Chunks"]
+        Prompt["Create Prompt<br/>with Context"]
+        LLM["Call LLM<br/>Gemini"]
+        Answer["🤖 Answer<br/>with Sources"]
+    end
+
+    Doc --> Load
+    Load --> Split
+    Split --> Embed
+    Embed --> Store
+    Store -->|saved| Retrieve
+
+    Question --> EmbedQ
+    EmbedQ --> Retrieve
+    Retrieve --> Build
+    Build --> Prompt
+    Prompt --> LLM
+    LLM --> Answer

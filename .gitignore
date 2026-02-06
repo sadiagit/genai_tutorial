@@ -1,0 +1,22 @@
+/uploads
+/data
+.env
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log   
+# VS Code settings
+.vscode/
+*/settings.json
+.vscode/settings.json
+backend/rag/data/*
+backend/db/genia.db
+issues_summary.md
+prep.md
+backend/uploads/PIANO TIMETABLE.pdf
+backend/uploads/Y5 Oratory Comp Speech.pdf
+backend/uploads/Year7RequirementsList.pdf
+*.db
+*/uploads/*

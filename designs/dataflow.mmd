@@ -1,0 +1,55 @@
+graph TB
+    User["👤 User"]
+    
+    subgraph Upload["FILE UPLOAD FLOW"]
+        direction LR
+        F1["File Selected"]
+        F2["POST /upload"]
+        F3["Loader.load_pdf/md"]
+        F4["Chunker.chunk_text<br/>tokenize"]
+        F5["Embeddings.embed_texts<br/>Gemini API"]
+        F6["VectorStore.add_chunks<br/>Chroma"]
+        F7["Return Status"]
+    end
+
+    subgraph Query["QUERY/CHAT FLOW"]
+        direction LR
+        Q1["User Question"]
+        Q2["POST /chat"]
+        Q3["Embeddings.embed_texts<br/>question"]
+        Q4["VectorStore.query<br/>top_k=3"]
+        Q5["RAGChain.answer<br/>build prompt"]
+        Q6["LLM Call Gemini<br/>generate answer"]
+        Q7["Return Answer"]
+    end
+
+    subgraph Persistent["PERSISTENT DATA"]
+        P1["uploads/<br/>PDF/MD files"]
+        P2["data/chroma/<br/>vectors + metadata"]
+        P3["db/todos.db<br/>todo items"]
+    end
+
+    User -->|selects file| Upload
+    F1 --> F2
+    F2 --> F3
+    F3 --> F4
+    F4 --> F5
+    F5 --> F6
+    F6 -->|indexed| P2
+    F6 --> F7
+    F7 -->|success| User
+
+    User -->|asks question| Query
+    Q1 --> Q2
+    Q2 --> Q3
+    Q3 --> Q4
+    Q4 -->|retrieves| P2
+    Q4 --> Q5
+    Q5 --> Q6
+    Q6 -->|calls| P2
+    Q6 --> Q7
+    Q7 -->|answer| User
+
+    F3 -->|saves| P1
+    Q3 -->|API call| GeminiExt["🔌 Gemini<br/>API"]
+    Q6 -->|API call| GeminiExt

@@ -1,0 +1,51 @@
+graph TB
+    subgraph Client["Client Side"]
+        Next["Next.js 16.x"]
+        React["React 19.x"]
+        TypeScript["TypeScript"]
+        Tailwind["Tailwind CSS"]
+        Components["Components<br/>Chat, Upload, Todo"]
+    end
+
+    subgraph Server["Server Side"]
+        FastAPI["FastAPI"]
+        Uvicorn["Uvicorn ASGI"]
+        Python["Python 3.x"]
+        PyPDF["PyPDF"]
+        Tiktoken["Tiktoken"]
+    end
+
+    subgraph VectorDB["Vector Database"]
+        Chroma["Chroma"]
+        SQLite["SQLite"]
+    end
+
+    subgraph ML["ML/AI Services"]
+        Gemini["Google Gemini API"]
+        Embeddings["text-embedding-004"]
+        LLM["LLM Model"]
+    end
+
+    subgraph Libraries["Key Libraries"]
+        CORS["CORS Middleware"]
+        Markdown["Markdown Parser"]
+    end
+
+    Next --> React
+    React --> TypeScript
+    TypeScript --> Tailwind
+
+    FastAPI --> Uvicorn
+    Uvicorn --> Python
+    Python --> PyPDF
+    Python --> Tiktoken
+    Python --> CORS
+    Python --> Markdown
+
+    FastAPI -->|stores| Chroma
+    FastAPI -->|stores| SQLite
+    FastAPI -->|calls| Gemini
+    Gemini --> Embeddings
+    Gemini --> LLM
+
+    Client -->|HTTP requests| FastAPI

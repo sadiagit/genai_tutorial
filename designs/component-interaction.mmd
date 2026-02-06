@@ -1,0 +1,57 @@
+
+graph TB
+    Client["🖥️ Browser Client"]
+    
+    subgraph FE["Frontend Layer"]
+        Page["page.tsx<br/>Main Entry"]
+        Input["ChatInput.tsx"]
+        Window["ChatWindow.tsx"]
+        Upload["FileUploader.tsx"]
+        Todo["TodoComponent.tsx"]
+    end
+
+    subgraph Server["Backend Layer"]
+        FastAPI["FastAPI Server"]
+        UploadEndpoint["/upload endpoint"]
+        ChatEndpoint["/chat endpoint"]
+        TodoEndpoint["/todos endpoints"]
+    end
+
+    subgraph Processing["Processing Layer"]
+        DocProc["Document Processing"]
+        RAGLogic["RAG Logic"]
+        TodoLogic["Todo Logic"]
+    end
+
+    subgraph Data["Data Layer"]
+        ChromaDB["Chroma<br/>Vector DB"]
+        SQLiteDB["SQLite<br/>Todo DB"]
+        FileSystem["File System<br/>uploads/"]
+    end
+
+    subgraph External["External APIs"]
+        GeminiAPI["Google Gemini API<br/>embeddings<br/>text-embedding-004"]
+    end
+
+    Client -->|HTTP/CORS| FE
+
+    Input -->|POST /chat| ChatEndpoint
+    Upload -->|POST /upload| UploadEndpoint
+    Todo -->|CRUD /todos| TodoEndpoint
+    Window -->|GET responses| FastAPI
+
+    ChatEndpoint --> RAGLogic
+    UploadEndpoint --> DocProc
+    TodoEndpoint --> TodoLogic
+
+    DocProc -->|save files| FileSystem
+    DocProc -->|store vectors| ChromaDB
+    DocProc -->|call API| GeminiAPI
+
+    RAGLogic -->|retrieve| ChromaDB
+    RAGLogic -->|call API| GeminiAPI
+
+    TodoLogic -->|read/write| SQLiteDB
+
+    GeminiAPI -->|embeddings| ChromaDB
+    GeminiAPI -->|LLM response| RAGLogic

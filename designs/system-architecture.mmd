@@ -1,0 +1,65 @@
+graph TB
+    subgraph Frontend["Frontend (Next.js)"]
+        UI["Chat UI"]
+        ChatInput["ChatInput Component"]
+        ChatWindow["ChatWindow Component"]
+        FileUpload["FileUploader Component"]
+        TodoComp["TodoComponent"]
+        Types["TypeScript Types"]
+    end
+
+    subgraph Backend["Backend (FastAPI)"]
+        Main["FastAPI App<br/>main.py"]
+        Upload["Upload Endpoint"]
+        Chat["Chat Endpoint"]
+        TodoAPI["Todo API Endpoints"]
+    end
+
+    subgraph RAG["RAG Pipeline"]
+        Loader["Document Loader<br/>loader.py"]
+        Chunker["Text Chunker<br/>chunker.py"]
+        Embeddings["Embeddings Generator<br/>embeddings.py"]
+        VectorStore["Vector Store Ops<br/>vectorstore.py"]
+        RAGChain["RAG Chain<br/>rag_chain.py"]
+    end
+
+    subgraph Storage["Storage & DB"]
+        Chroma["Chroma Vector DB<br/>data/chroma/"]
+        TodoDB["SQLite Database<br/>todos.db"]
+        Uploads["File Uploads<br/>uploads/"]
+    end
+
+    subgraph External["External Services"]
+        Gemini["Google Gemini API<br/>Embeddings & LLM"]
+    end
+
+    UI -->|user input| ChatInput
+    UI -->|display| ChatWindow
+    UI -->|upload docs| FileUpload
+    UI -->|manage todos| TodoComp
+
+    ChatInput -->|send question| Chat
+    FileUpload -->|upload file| Upload
+    TodoComp -->|CRUD ops| TodoAPI
+
+    Chat -->|process| RAGChain
+    Upload -->|process| Loader
+
+    Loader -->|chunk| Chunker
+    Chunker -->|embed| Embeddings
+    Embeddings -->|query Gemini| Gemini
+    Gemini -->|return embeddings| Embeddings
+
+    Embeddings -->|store chunks| VectorStore
+    VectorStore -->|save to| Chroma
+
+    RAGChain -->|retrieve chunks| Chroma
+    RAGChain -->|generate answer| Gemini
+    Gemini -->|answer| RAGChain
+
+    RAGChain -->|return response| Chat
+    Chat -->|display| ChatWindow
+
+    TodoAPI -->|CRUD| TodoDB
+
+    Upload -->|save file| Uploads
