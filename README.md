@@ -146,11 +146,11 @@ genai_tutorial/
 ## 🏛️ Architecture Diagrams
 
 ### System Architecture Overview
-![alt text](designs\system-arch.png)
+![System Architecture](designs/system-arch.png)
 
 
 ### RAG Pipeline Flowchart
-![alt text](designs\rag-pipeline.png)
+![RAG Pipeline Flowchart](designs/rag-pipeline.png)
 
 
 
@@ -163,7 +163,7 @@ genai_tutorial/
 
 
 ### Tech Stack Architecture
-![alt text](designs\tech-stack.png)
+![Tech Stack Architecture](designs/tech-stack.png)
 
 
 
