@@ -14,18 +14,28 @@ for m in genai.list_models():
   if 'generateContent' in m.supported_generation_methods:
     print(m.name)
 
-model = genai.GenerativeModel("models/gemini-2.5-flash-lite", tools=tools)
+model = genai.GenerativeModel("models/gemini-flash-latest", tools=tools)
 SYSTEM_PROMPT = """You are Genia, a helpful assistant.
+You have access to retrieved context from documents and a todo_tool for managing todo tasks.
 
-If the question is about todos:
-- Call todo_tool before answering
+IMPORTANT INSTRUCTIONS:
+1. ALWAYS prioritize answering questions using the retrieved context from documents first.
+2. ONLY use the todo_tool if the question is explicitly about managing, creating, or modifying todo tasks (e.g., "add a task", "mark as done", "list my tasks").
+3. Do NOT call todo_tool for general knowledge questions, even if they seem vaguely related.
+4. If you call todo_tool, use its response to answer the user's question if relevant.
+5. If retrieved context is available and relevant, use it to provide accurate answers.
+6. If no relevant context or tool applies, tell the user you don't have that information.
 
-You may use:
-- Retrieved context
-- Tool responses
+Examples of when to use todo_tool:
+- "Add a task to fix the prompt tomorrow"
+- "Show me my tasks"
+- "Mark task 1 as complete"
 
-Trust tool responses over context.
-If unsure after tools, say you don't know.
+Examples of when NOT to use todo_tool:
+- "What is the junior girls uniform?" (answer from document context)
+- "What are the uniform standards?" (answer from document context)
+- Any factual question answerable from retrieved documents
+
 """
 def extract_text(response):
     if not response or not response.candidates:
@@ -49,18 +59,29 @@ def answer_question(question: str):
         context_blocks.append(f"[{i+1}] ({source}) {doc}")
 
     context = "\n\n".join(context_blocks)
-    prompt = f"""
-{SYSTEM_PROMPT}
-You have access to a todo_tool that can:
-- add tasks
-- list tasks
-- complete tasks
-- delete tasks
+    prompt = f"""{SYSTEM_PROMPT}
 
-Context:
+Available Tools:
+- todo_tool: Manage your tasks
+  * "add" - Add a new task. Provide the task description.
+  * "list" - Show all your tasks. No parameters needed.
+  * "complete" - Mark a task as done. Provide the task description to find and complete it (e.g., "Mark fix the prompt tomorrow as complete" → task="fix the prompt tomorrow")
+  * "delete" - Delete a task. Provide the task description to find and delete it (e.g., "delete the prompt fix task" → task="prompt fix")
+
+IMPORTANT: The tool will automatically find tasks by description matching. You don't need task IDs!
+
+Retrieved Context from Documents:
 {context}
 
-Question: {question}
+User Question: {question}
+
+Instructions: 
+1. First, determine if this question requires the todo_tool or if it should be answered from the retrieved context.
+2. If the question is about managing tasks, use the todo_tool with the appropriate action and parameters.
+   - For "complete" or "delete": extract and pass the task description from the user's request
+   - The tool will find the matching task automatically
+3. If the question is about factual information, answer using the retrieved context above.
+4. Provide a clear, helpful answer to the user.
 """
     messages =[{
         "role": "user",
