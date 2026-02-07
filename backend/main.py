@@ -9,11 +9,15 @@ from rag.embeddings import embed_texts
 from rag.vectorstore import add_chunks
 from rag.rag_chain import answer_question
 from db.create_todo_table import init_db
+from sse.routes import router as sse_router
 
 # Initialize the database if not already done
 init_db()
 
 app = FastAPI()
+
+#register the SSE router
+app.include_router(sse_router)
 
 # Add CORS middleware
 app.add_middleware(

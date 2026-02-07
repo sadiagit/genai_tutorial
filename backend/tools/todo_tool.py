@@ -1,6 +1,9 @@
+import asyncio
+import json
 from db.db import get_db_connection
 from google.generativeai.types import FunctionDeclaration, Tool
 from difflib import SequenceMatcher
+from sse.events import broadcaster
 
 todo_function = FunctionDeclaration(
     name="todo_tool",
@@ -71,6 +74,13 @@ def handle_todo_tool(user_id: str, args: dict):
             (user_id, text)
         )
         db.commit()
+        
+        # run broadcast in background
+        asyncio.create_task(broadcaster.broadcast(json.dumps({
+            "event": "todos_updated",
+            "action": "add",
+            "data": f"New task added: {text}"
+        })))
         return {"status": "added", "task": text}
 
     if action == "list":
@@ -96,6 +106,11 @@ def handle_todo_tool(user_id: str, args: dict):
                 (task_id, user_id)
             )
             db.commit()
+            asyncio.create_task(broadcaster.broadcast(json.dumps({
+                "event": "todos_updated",
+                "action": "complete",
+                "task_id": task_id
+            })))
             return {"status": "completed", "task_id": task_id}
         
         # Otherwise, find task by description
@@ -109,6 +124,12 @@ def handle_todo_tool(user_id: str, args: dict):
             (task_id, user_id)
         )
         db.commit()
+        asyncio.create_task(broadcaster.broadcast(json.dumps({
+            "event": "todos_updated",
+            "action": "complete",
+            "task_id": task_id,
+            "task": match_result["task_text"]
+        })))
         return {"status": "completed", "task_id": task_id, "task": match_result["task_text"]}
     
     if action == "delete":
@@ -126,6 +147,11 @@ def handle_todo_tool(user_id: str, args: dict):
                 (task_id, user_id)
             )
             db.commit()
+            asyncio.create_task(broadcaster.broadcast(json.dumps({
+                "event": "todos_updated",
+                "action": "delete",
+                "task_id": task_id
+            })))
             return {"status": "deleted", "task_id": task_id}
         
         # Otherwise, find task by description
@@ -139,6 +165,12 @@ def handle_todo_tool(user_id: str, args: dict):
             (task_id, user_id)
         )
         db.commit()
+        asyncio.create_task(broadcaster.broadcast(json.dumps({
+            "event": "todos_updated",
+            "action": "delete",
+            "task_id": task_id,
+            "task": match_result["task_text"]
+        })))
         return {"status": "deleted", "task_id": task_id, "task": match_result["task_text"]}
 
 tools = [Tool(function_declarations=[todo_function])]

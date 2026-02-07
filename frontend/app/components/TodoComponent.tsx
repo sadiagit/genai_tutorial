@@ -1,3 +1,4 @@
+import { useTodoEvents } from "hooks/useTodoEvents";
 import { useEffect, useState } from "react";
 
 export default function TodoComponent() {
@@ -8,6 +9,9 @@ export default function TodoComponent() {
       const data = await response.json();
       setTodos(data);
     }
+
+    useTodoEvents(fetchTodos);
+
      useEffect(() => {
     fetchTodos();
   }, []);
