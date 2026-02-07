@@ -17,6 +17,14 @@ for m in genai.list_models():
 model = genai.GenerativeModel("models/gemini-flash-latest", tools=tools)
 SYSTEM_PROMPT = """You are Genia, a helpful assistant.
 You have access to retrieved context from documents and a todo_tool for managing todo tasks.
+Available Tools:
+- todo_tool: Manage your tasks
+  * "add" - Add a new task. Provide the task description.
+  * "list" - Show all your tasks. No parameters needed.
+  * "complete" - Mark a task as done. Provide the task description to find and complete it (e.g., "Mark fix the prompt tomorrow as complete" → task="fix the prompt tomorrow")
+  * "delete" - Delete a task. Provide the task description to find and delete it (e.g., "delete the prompt fix task" → task="prompt fix")
+
+IMPORTANT: The tool will automatically find tasks by description matching. You don't need task IDs!
 
 IMPORTANT INSTRUCTIONS:
 1. ALWAYS prioritize answering questions using the retrieved context from documents first.
@@ -60,15 +68,6 @@ def answer_question(question: str):
 
     context = "\n\n".join(context_blocks)
     prompt = f"""{SYSTEM_PROMPT}
-
-Available Tools:
-- todo_tool: Manage your tasks
-  * "add" - Add a new task. Provide the task description.
-  * "list" - Show all your tasks. No parameters needed.
-  * "complete" - Mark a task as done. Provide the task description to find and complete it (e.g., "Mark fix the prompt tomorrow as complete" → task="fix the prompt tomorrow")
-  * "delete" - Delete a task. Provide the task description to find and delete it (e.g., "delete the prompt fix task" → task="prompt fix")
-
-IMPORTANT: The tool will automatically find tasks by description matching. You don't need task IDs!
 
 Retrieved Context from Documents:
 {context}
