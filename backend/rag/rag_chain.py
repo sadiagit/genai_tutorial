@@ -14,7 +14,7 @@ for m in genai.list_models():
   if 'generateContent' in m.supported_generation_methods:
     print(m.name)
 
-model = genai.GenerativeModel("models/gemini-flash-latest", tools=tools)
+model = genai.GenerativeModel("models/gemini-3-flash-preview", tools=tools)
 SYSTEM_PROMPT = """You are Genia, a helpful assistant.
 You have access to retrieved context from documents and a todo_tool for managing todo tasks.
 Available Tools:
@@ -27,7 +27,7 @@ Available Tools:
 IMPORTANT: The tool will automatically find tasks by description matching. You don't need task IDs!
 
 IMPORTANT INSTRUCTIONS:
-1. ALWAYS prioritize answering questions using the retrieved context from documents first.
+1. ALWAYS prioritize answering questions using the retrieved context from the uploaded documents first.
 2. ONLY use the todo_tool if the question is explicitly about managing, creating, or modifying todo tasks (e.g., "add a task", "mark as done", "list my tasks").
 3. Do NOT call todo_tool for general knowledge questions, even if they seem vaguely related.
 4. If you call todo_tool, use its response to answer the user's question if relevant.
